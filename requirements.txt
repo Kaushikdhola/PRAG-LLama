@@ -4,3 +4,5 @@ judge
 ollama
 sentence-transformers
 scikit-learn
+transformers
+torch

@@ -2,6 +2,9 @@ import streamlit as st
 from .user_details import collect_user_details
 from .chat import display_chat, handle_user_input
 from .response_generation import initialize_models, generate_response
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 def run_app():
     st.title("Personalized Recommender System")
@@ -13,11 +16,14 @@ def run_app():
     if 'user_details' not in st.session_state:
         st.session_state.user_details = None
 
+    if 'models' not in st.session_state:
+        st.session_state.models = initialize_models()
+
     # Collect user details
     collect_user_details()
 
-    # Initialize models
-    llama_model, faiss_db = initialize_models()
+    # Unpack models
+    llama_model, vector_store, faiss_db = st.session_state.models
 
     # Handle user input
     user_input = handle_user_input()
@@ -26,7 +32,7 @@ def run_app():
     if user_input:
         last_response = st.session_state.chat_history[-1]['bot'] if st.session_state.chat_history else None
         user_details = st.session_state.user_details
-        response = generate_response(user_input, user_details, last_response, llama_model, faiss_db)
+        response = generate_response(user_input, user_details, last_response, llama_model, vector_store)
         
         st.session_state.chat_history.append({"user": user_input, "bot": response})
 
