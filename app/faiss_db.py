@@ -7,7 +7,6 @@ class FaissDB:
         self.index = faiss.IndexFlatL2(dimension)
     
     def store_vector(self, vector):
-        # Convert the vector to a numpy array with type float32
         vector_np = np.array(vector).astype('float32').reshape(1, -1)
         self.index.add(vector_np)
     

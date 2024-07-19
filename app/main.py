@@ -2,9 +2,6 @@ import streamlit as st
 from .user_details import collect_user_details
 from .chat import display_chat, handle_user_input
 from .response_generation import initialize_models, generate_response
-import logging
-
-logging.basicConfig(level=logging.DEBUG)
 
 def run_app():
     st.title("Personalized Recommender System")

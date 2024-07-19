@@ -6,7 +6,7 @@ import numpy as np
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from sentence_transformers import util
 
 def initialize_models():
