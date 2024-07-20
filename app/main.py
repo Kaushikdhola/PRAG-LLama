@@ -4,59 +4,7 @@ from .chat import display_chat, handle_user_input
 from .response_generation import generate_response
 from .model import initialize_models
 from .prompt_generation import generate_prompt
-
-def train_model_page():
-    st.title("Train Your Own Model")
-    
-    if 'training_input' not in st.session_state:
-        st.session_state.training_input = ""
-
-    # Text input for training data
-    user_input = st.text_area("Enter your training data (press Enter to add more content):", 
-                              value=st.session_state.training_input,
-                              height=200,
-                              key="training_data_input")
-    
-    # Button to append content to file
-    if st.button("Add Content"):
-        with open("training_data.txt", "a") as f:
-            f.write(user_input + "\n")
-        st.success("Content added successfully!")
-    
-    # Button to train the model
-    if st.button("Train Model"):
-        # Read the entire file
-        with open("training_data.txt", "r") as f:
-            training_data = f.read()
-        
-        # Here you would implement training logic - kunal
-        # For this example, we'll just pretend to train
-        st.info("Training model... This may take a while.")
-        # Simulating training time
-        import time
-        time.sleep(5)
-        st.success("Model trained successfully!")
-    
-    # Input for questions
-    question = st.text_input("Ask a question based on the trained data:")
-    
-    # Button to submit question
-    if st.button("Submit Question"):
-        if 'models' not in st.session_state:
-            st.session_state.models = initialize_models()
-        
-        llama_model, vector_store, faiss_db, embeddings = st.session_state.models
-        
-        # Here you would implement personalized RAG logic - kunal
-        # For this example, we'll just use a simple response
-        prompt = generate_prompt(question, {}, None, llama_model, vector_store, embeddings)
-        response = generate_response(prompt, llama_model)
-        
-        st.write("Response:", response)
-
-    if st.button("Return to Main Page"):
-        st.session_state.page = "main"
-        st.experimental_rerun()
+from .trainRAG.main import train_model_page
 
 def run_app():
 
