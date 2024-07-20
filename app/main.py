@@ -8,7 +8,6 @@ from .prompt_generation import generate_prompt
 def train_model_page():
     st.title("Train Your Own Model")
     
-    # Use session state to manage the text input
     if 'training_input' not in st.session_state:
         st.session_state.training_input = ""
 
@@ -30,7 +29,7 @@ def train_model_page():
         with open("training_data.txt", "r") as f:
             training_data = f.read()
         
-        # Here you would implement your training logic
+        # Here you would implement training logic - kunal
         # For this example, we'll just pretend to train
         st.info("Training model... This may take a while.")
         # Simulating training time
@@ -48,25 +47,22 @@ def train_model_page():
         
         llama_model, vector_store, faiss_db, embeddings = st.session_state.models
         
-        # Here you would implement your personalized RAG logic
+        # Here you would implement personalized RAG logic - kunal
         # For this example, we'll just use a simple response
         prompt = generate_prompt(question, {}, None, llama_model, vector_store, embeddings)
         response = generate_response(prompt, llama_model)
         
         st.write("Response:", response)
 
-         # Add a button to return to the main page
     if st.button("Return to Main Page"):
         st.session_state.page = "main"
         st.experimental_rerun()
 
 def run_app():
 
-    # Add a button at the top to navigate to the training page
     if st.button("Train Your Own Model"):
         st.session_state.page = "train"
 
-    # Check which page to display
     if 'page' not in st.session_state:
         st.session_state.page = "main"
     
