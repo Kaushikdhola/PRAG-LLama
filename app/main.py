@@ -1,7 +1,9 @@
 import streamlit as st
 from .user_details import collect_user_details
 from .chat import display_chat, handle_user_input
-from .response_generation import initialize_models, generate_response
+from .response_generation import generate_response
+from .model import initialize_models
+from .prompt_generation import generate_prompt
 
 def run_app():
     st.title("Personalized Recommender System")
@@ -20,7 +22,7 @@ def run_app():
     collect_user_details()
 
     # Unpack models
-    llama_model, vector_store, faiss_db = st.session_state.models
+    llama_model, vector_store, faiss_db, embeddings = st.session_state.models
 
     # Handle user input
     user_input = handle_user_input()
@@ -29,8 +31,11 @@ def run_app():
     if user_input:
         last_response = st.session_state.chat_history[-1]['bot'] if st.session_state.chat_history else None
         user_details = st.session_state.user_details
-        response = generate_response(user_input, user_details, last_response, llama_model, vector_store)
+        prompt = generate_prompt(user_input, user_details, last_response, llama_model, vector_store, embeddings)
+        response = generate_response(prompt, llama_model)
         
         st.session_state.chat_history.append({"user": user_input, "bot": response})
+        response_vector = embeddings.embed_query(response)
+        vector_store.add_texts([response], embeddings=[response_vector])
 
     display_chat()
