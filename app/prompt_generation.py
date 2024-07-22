@@ -16,13 +16,13 @@ def generate_prompt(user_input, user_details, last_response, llama_model, vector
     prompt_template = PromptTemplate(
     input_variables=["user_details", "user_input", "context"],
     template="""
-    User details: {user_details}
+    My details: {user_details}
 
     Question: {user_input}
 
     Context: {context}
     
-    Please create a specific and effective prompt based on the user's details, the user's question, and the provided context. If the context is relevant to the question, include it in the prompt. Otherwise, generate the prompt using just the user's details and question. Here is the prompt I need:
+    Please create a specific and effective prompt based on the my details, my question, and the provided context. If the context is relevant to the question, include it in the prompt. Otherwise, generate the prompt using just the my details and question. Here is the prompt I need:
     """
     )
 
