@@ -9,4 +9,6 @@ def display_chat():
     pass
 
 def handle_user_input():
-    return st.text_input("You: ", key="input")
+    user_input = st.text_input("You:", key="user_input")
+    submit_button = st.button("Send")
+    return user_input, submit_button
