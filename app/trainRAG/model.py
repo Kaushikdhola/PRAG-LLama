@@ -7,5 +7,4 @@ def initialize_models():
     llama_model = Ollama(model="phi3", temperature = 0.1)
     embeddings = HuggingFaceEmbeddings()
     vector_store = FAISS.from_texts(["Initial document"], embeddings)
-    
     return llama_model, vector_store, embeddings
