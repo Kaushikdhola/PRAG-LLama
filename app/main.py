@@ -6,8 +6,9 @@ from .response_generation import generate_response
 from .model import initialize_models
 from .prompt_generation import generate_prompt
 from .trainRAG.main import train_model_page
-from .evaluation import evaluate_response
+from .evaluation import evaluate_response   
 from .summarise import summarise
+from langchain.retrievers.multi_query import MultiQueryRetriever
 
 def run_app():
     if st.button("Train Your Own Model"):
@@ -58,20 +59,22 @@ def run_app():
             # Get responses in parallel
             response_1, response_2 = generate_responses()
             
+            st.write(response_1, response_2)
+            
             # Summarize the responses
-            summarize_response = summarise(user_input, response_1, response_2, llama_model)
-            eval = evaluate_response(user_input, summarize_response, llama_model)
+            # summarize_response = summarise(user_input, response_1, response_2, llama_model)
+            # eval = evaluate_response(user_input, summarize_response, llama_model)
             
             # Update chat history and vector store
-            st.session_state.chat_history.append({"user": user_input, "bot": summarize_response})
-            response_vector = embeddings.embed_query(summarize_response)
-            vector_store.add_texts([summarize_response], embeddings=[response_vector])
+            # st.session_state.chat_history.append({"user": user_input, "bot": summarize_response})
+            # response_vector = embeddings.embed_query(summarize_response)
+            # vector_store.add_texts([summarize_response], embeddings=[response_vector])
             
-            # Display results
-            st.write("Summarise Result:")
-            st.write(summarize_response)
+            # # Display results
+            # st.write("Summarise Result:")
+            # st.write(summarize_response)
             
-            st.write("Evaluation Results:")
-            st.write(eval)
+            # st.write("Evaluation Results:")
+            # st.write(eval)
             
         display_chat()

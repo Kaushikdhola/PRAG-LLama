@@ -67,7 +67,7 @@ def generate_prompt(user_input, user_details, last_response, llama_model, vector
         details = None
     
     # Generate response
-    response = llm_chain.predict(user_details=details, user_input=user_input, context=context)
+    response = llm_chain.predict(user_details=None, user_input=user_input, context=None)
     
     print("-------------------Response----------------", response)
 
