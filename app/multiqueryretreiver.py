@@ -17,7 +17,14 @@ def multiQueryRetreiver(user_query, phi_model, vectorStore):
         retriever = vectorStore.as_retriever(), llm = phi_model
     )
     
-    unique_docs = retriever_from_llm.invoke(user_query)
+    docs = retriever_from_llm.get_relevant_documents(query = user_query)
+    
+    context = "\n---\n".join([d.page_content for d in docs])
+    
+    print(context)
+    
+    return context
+    
 
     
     

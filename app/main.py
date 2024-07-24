@@ -8,7 +8,8 @@ from .prompt_generation import generate_prompt
 from .trainRAG.main import train_model_page
 from .evaluation import evaluate_response   
 from .summarise import summarise
-from langchain.retrievers.multi_query import MultiQueryRetriever
+# from langchain.retrievers.multi_query import MultiQueryRetriever
+from .multiqueryretreiver import multiQueryRetreiver
 
 def run_app():
     if st.button("Train Your Own Model"):
@@ -23,8 +24,8 @@ def run_app():
         st.title("Personalized Recommender System")
 
         # Initialize session state
-        if 'chat_history' not in st.session_state:
-            st.session_state.chat_history = []
+        # if 'chat_history' not in st.session_state:
+        #     st.session_state.chat_history = []
 
         if 'user_details' not in st.session_state:
             st.session_state.user_details = None
@@ -43,23 +44,35 @@ def run_app():
 
         # Process user input and generate response
         if user_input:
-            last_response = st.session_state.chat_history[-1]['bot'] if st.session_state.chat_history else None
+            # last_response = st.session_state.chat_history[-1]['bot'] if st.session_state.chat_history else None
             user_details = st.session_state.user_details
-            prompt = generate_prompt(user_input, user_details, last_response, llama_model, vector_store, embeddings)
+            
+            for i in range(3):
+                context = multiQueryRetreiver(user_input, phi_model, vector_store)
+                
+                response = generate_response(user_input, context, phi_model)
+                
+                evaluation_score = evaluate_response(user_input, response, vector_store, llama_model)
+            
+                if evaluation_score > threshold: 
+                    break
+            
+            
+            # prompt = generate_prompt(user_input, user_details, lazst_response, llama_model, vector_store, embeddings)
             
             # Define a helper function for generating responses
-            def generate_responses():
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                    future_response_1 = executor.submit(generate_response, prompt, llama_model)
-                    future_response_2 = executor.submit(generate_response, prompt, phi_model)
-                    response_1 = future_response_1.result()
-                    response_2 = future_response_2.result()
-                return response_1, response_2
+            # def generate_responses():
+            #     with concurrent.futures.ThreadPoolExecutor() as executor:
+            #         future_response_1 = executor.submit(generate_response, prompt, llama_model)
+            #         future_response_2 = executor.submit(generate_response, prompt, phi_model)
+            #         response_1 = future_response_1.result()
+            #         response_2 = future_response_2.result()
+            #     return response_1, response_2
 
-            # Get responses in parallel
-            response_1, response_2 = generate_responses()
+            # # Get responses in parallel
+            # response_1, response_2 = generate_responses()
             
-            st.write(response_1, response_2)
+            # st.write(response_1, response_2)
             
             # Summarize the responses
             # summarize_response = summarise(user_input, response_1, response_2, llama_model)
@@ -77,4 +90,4 @@ def run_app():
             # st.write("Evaluation Results:")
             # st.write(eval)
             
-        display_chat()
+        display_chat()  

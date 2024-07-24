@@ -19,7 +19,7 @@ from sentence_transformers import util
 
 
 # def generate_response(user_input, user_details, last_response, llama_model, vector_store):
-def generate_response(user_input, llama_model):
+def generate_response(user_input, context, phi_model):
     embeddings = HuggingFaceEmbeddings()
 
     # Create a prompt template
