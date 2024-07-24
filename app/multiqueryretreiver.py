@@ -9,6 +9,11 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from sentence_transformers import util
 import streamlit as st
 from langchain.retrievers.multi_query import MultiQueryRetriever
+import logging
+
+logging.basicConfig()
+logging.getLogger("langchain.retrievers.multi_query").setLevel(logging.INFO)
+
 
 
 def multiQueryRetreiver(user_query, phi_model, vectorStore):
@@ -17,9 +22,12 @@ def multiQueryRetreiver(user_query, phi_model, vectorStore):
         retriever = vectorStore.as_retriever(), llm = phi_model
     )
     
-    docs = retriever_from_llm.get_relevant_documents(query = user_query)
+    docs = retriever_from_llm.invoke(user_query)
     
     context = "\n---\n".join([d.page_content for d in docs])
+    
+    
+    print("-" * 100)
     
     print(context)
     

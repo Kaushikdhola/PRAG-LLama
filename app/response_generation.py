@@ -74,7 +74,7 @@ def generate_response(user_input, context, phi_model):
 
     # Create an LLMChain
     llm_chain = LLMChain(
-        llm=llama_model,
+        llm=phi_model,
         prompt=prompt_template,
         verbose=True
     )

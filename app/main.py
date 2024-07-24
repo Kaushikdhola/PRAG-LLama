@@ -47,15 +47,17 @@ def run_app():
             # last_response = st.session_state.chat_history[-1]['bot'] if st.session_state.chat_history else None
             user_details = st.session_state.user_details
             
-            for i in range(3):
-                context = multiQueryRetreiver(user_input, phi_model, vector_store)
+            # for i in range(3):
+            context = multiQueryRetreiver(user_input, phi_model, vector_store)
                 
-                response = generate_response(user_input, context, phi_model)
+                # response = generate_response(user_input, context, phi_model)
                 
-                evaluation_score = evaluate_response(user_input, response, vector_store, llama_model)
+                # evaluation_score = evaluate_response(user_input, response, vector_store, llama_model)
+                
+                # break
             
-                if evaluation_score > threshold: 
-                    break
+                # if evaluation_score > threshold: 
+                #     break
             
             
             # prompt = generate_prompt(user_input, user_details, lazst_response, llama_model, vector_store, embeddings)
