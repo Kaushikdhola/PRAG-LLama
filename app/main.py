@@ -11,6 +11,7 @@ from .summarise import summarise
 # from langchain.retrievers.multi_query import MultiQueryRetriever
 from .multiqueryretreiver import multiQueryRetreiver
 from .perAnalyse import personalize_analyzer
+from .docRetreiver import docRetreiver
 
 def run_app():
     # if st.button("Train Your Own Model"):
@@ -54,7 +55,11 @@ def run_app():
             vector_store.add_texts([user_input], embeddings=[embeddings.embed_query(user_input)])
             
         # for i in range(3):
-        context = multiQueryRetreiver(user_input, phi_model, vector_store)
+        queries = multiQueryRetreiver(user_input, phi_model, vector_store)
+        print(queries)
+        context = docRetreiver(vector_store, queries)
+        
+        
             
             # response = generate_response(user_input, context, phi_model)
             

@@ -35,7 +35,7 @@ prompt_template = PromptTemplate(
 
 def evaluate_response(user_input, response, vector_store, model):
     
-    model = Ollama(model="llama3", temperature = 0.0)
+    # model = Ollama(model="llama3", temperature = 0.0)
 
     judge_model = LLMChain(
         llm=model,
