@@ -11,6 +11,10 @@ from .summarise import summarise
 # from langchain.retrievers.multi_query import MultiQueryRetriever
 from .multiqueryretreiver import multiQueryRetreiver
 from .perAnalyse import personalize_analyzer
+from .vectorCheck import ensure_directory_exists
+from .vectorCheck import load_or_create_vector_store
+from .vectorCheck import add_content_to_vector_store
+from .vectorCheck import save_vector_store
 from .docRetreiver import docRetreiver
 
 def run_app():
@@ -49,11 +53,18 @@ def run_app():
         # last_response = st.session_state.chat_history[-1]['bot'] if st.session_state.chat_history else None
         user_details = st.session_state.user_details
             
-        isPersonalised=personalize_analyzer(user_input, phi_model, vector_store, embeddings)
-        if (isPersonalised=="yes"):
-            print("yes personlized")
-            vector_store.add_texts([user_input], embeddings=[embeddings.embed_query(user_input)])
+        PersonalisedJson=personalize_analyzer(user_input, phi_model, vector_store, embeddings)
+        print(PersonalisedJson)
+        if(PersonalisedJson['ispersonalized']=="yes"):
+            personalized_context = PersonalisedJson['personalizedcontent']
             
+            # Load or create the vector store
+            vector_store = load_or_create_vector_store("./personalized", embeddings)
+            
+            add_content_to_vector_store(vector_store, personalized_context, embeddings)
+            
+            save_vector_store(vector_store, './personalized')
+        
         # for i in range(3):
         queries = multiQueryRetreiver(user_input, phi_model, vector_store)
         print(queries)
