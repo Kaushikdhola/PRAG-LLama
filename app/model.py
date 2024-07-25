@@ -6,7 +6,7 @@ from langchain_community.vectorstores import FAISS
 
 def initialize_models():
     llama_model = Ollama(model="llama3", temperature = 0)
-    phi_model = Ollama(model="phi3", temperature = 0)
+    phi_model = Ollama(model="phi3", temperature = 0, format="json")
     embeddings = HuggingFaceEmbeddings()
     vector_store = FAISS.from_texts(["Initial document"], embeddings)
     faiss_db = FaissDB() 

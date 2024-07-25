@@ -5,35 +5,54 @@ from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain_community.vectorstores import FAISS
 
 def personalize_analyzer(text, phi_model, vector_store, embeddings):
+
     prompt_template = """
+
+    ### Personalized Content Analyzer
+
+    You are an AI assistant trained to identify personalized content in text. Personalized content includes any information that is specific 
+    to an individual user, such as their preferences, history, demographics, or any identifiable information. Your task is to analyze the 
+    given text and determine if it contains any personalized content.
+
+    #### Instructions:
     Analyze the following text to determine if it contains any personalized content. 
     Personalized content includes, but is not limited to:
 
-    1. Individual preferences (e.g., "I like", "I prefer", "My favorite")
-    2. Personal history or experiences (e.g., "I've been to", "I've watched", "Last week I")
+    1. Individual preferences (e.g., "I like", "I prefer", "My favorite", "I love")
+    2. Personal history or experiences (e.g., "I've been to", "I've watched", "Last week I", "I work")
     3. Demographic information (e.g., age, gender, location, occupation)
     4. Specific identifiers (e.g., names, usernames, email addresses)
     5. Individual circumstances (e.g., "My car broke down", "I'm looking for a new job")
-    6. Health-related information (e.g., "I'm allergic to", "My doctor said")
-    7. Financial information (e.g., "My budget is", "I can afford")
-    8. Educational background (e.g., "I studied", "My major was")
-    9. Family or relationship details (e.g., "My spouse", "My kids")
-    10. Personal goals or intentions (e.g., "I want to", "I'm planning to")
+    6. Financial information (e.g., "My budget is", "I can afford")
+    7. Educational background (e.g., "I studied", "My major was")
+    8. Family or relationship details (e.g., "My spouse", "My kids")
+    9. Personal goals or intentions (e.g., "I want to", "I'm planning to")
+    ---
 
     Text to analyze: {text}
-
-    Step-by-step analysis:
+    
+    ---
+    #### Step-by-step analysis: 
     1. Identify any words or phrases that indicate personal information (e.g., "I", "my", "me").
     2. Look for specific examples of preferences, experiences, or circumstances.
     3. Check for any demographic or identifiable information.
     4. Determine if the text is written from a personal perspective or contains individual-specific details.
+    
+    Based on the analysis, provide a response indicating whether the text contains personalized content. If personalized content is found, break down and summarize each piece of 
+    personalized information in a single line ONLY no need to give any explaination.
 
-    Based on your analysis, respond with ONLY ONE of the following:
-    - If ANY personalized content is found, respond with "yes".
-    - If NO personalized content is found, respond with "no".
+    You MUST give formatted response here in JSON with the following format ONLY:
+    ``` 
+    JSON
 
-    Your one-word response:
+    {{
+        "isPersonalized": "yes/no",
+        "personalizedContent": ["summarized personalized content 1", "summarized personalized content 2", ...]
+    }}
+    ```
+    Ensure each piece of personalized content is summarized in a single, concise line.
     """
+
 
     prompt = PromptTemplate(template=prompt_template, input_variables=["text"])
     
