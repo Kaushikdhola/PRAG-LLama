@@ -86,4 +86,4 @@ def generate_response(user_input, context, phi_model):
 
     # Generate a vector for the response and store it
 
-    return response
+    return respons

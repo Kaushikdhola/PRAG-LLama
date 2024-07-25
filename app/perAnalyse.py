@@ -3,6 +3,7 @@ from langchain.prompts import PromptTemplate
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain_community.vectorstores import FAISS
+import json
 
 def personalize_analyzer(text, phi_model, vector_store, embeddings):
 
@@ -18,15 +19,15 @@ def personalize_analyzer(text, phi_model, vector_store, embeddings):
     Analyze the following text to determine if it contains any personalized content. 
     Personalized content includes, but is not limited to:
 
-    1. Individual preferences (e.g., "I like", "I prefer", "My favorite", "I love")
-    2. Personal history or experiences (e.g., "I've been to", "I've watched", "Last week I", "I work")
+    1. Individual preferences (e.g., "User likes", "User prefers", "User's favorite", "User loves")
+    2. Personal history or experiences (e.g., "User has been to", "User has watched", "Last week user", "User works")
     3. Demographic information (e.g., age, gender, location, occupation)
     4. Specific identifiers (e.g., names, usernames, email addresses)
-    5. Individual circumstances (e.g., "My car broke down", "I'm looking for a new job")
-    6. Financial information (e.g., "My budget is", "I can afford")
-    7. Educational background (e.g., "I studied", "My major was")
-    8. Family or relationship details (e.g., "My spouse", "My kids")
-    9. Personal goals or intentions (e.g., "I want to", "I'm planning to")
+    5. Individual circumstances (e.g., "User's car broke down", "User is looking for a new job")
+    6. Financial information (e.g., "User's budget is", "User can afford")
+    7. Educational background (e.g., "User studied", "User's major was")
+    8. Family or relationship details (e.g., "User's spouse", "User's kids")
+    9. Personal goals or intentions (e.g., "User wants to", "User is planning to")
     ---
 
     Text to analyze: {text}
@@ -69,14 +70,12 @@ def personalize_analyzer(text, phi_model, vector_store, embeddings):
         response = llm_chain.generate([{"text": text}])
         
         generated_text = response.generations[0][0].text.strip().lower()
-        
-        print("Personalized content analysis response:", generated_text)
-        
-        if "yes" in generated_text:
-            return "yes"
-        else:
-            return "no"
-        
+        try: 
+            return json.loads(generated_text)
+
+        except Exception as e:
+            return json.loads('{"isPersonalized": "no", "personalizedContent": []}')
+    
     except Exception as e:
         print(f"An error occurred: {str(e)}")
-        return "no"
+        return json.loads('{"isPersonalized": "no", "personalizedContent": []}')
