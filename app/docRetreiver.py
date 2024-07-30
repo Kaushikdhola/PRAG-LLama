@@ -1,25 +1,24 @@
-
+#Cosine similarity (-1 to 1)
+THRESHOLD = 0
 
 def docRetreiver(vectorStore, queries):
-    retreiver = vectorStore.as_retriever()
+    retreiver = vectorStore
     
     docs = set()
     
     for i in queries:
-        for doc in retreiver.invoke(i):
-            docs.add(doc.page_content)
-    
+        for doc, score in retreiver.search(i):
+            if score > THRESHOLD:
+                docs.add(doc.page_content)
     
     return formatter(docs)
-    # return context
 
 def formatter(docs):
     if len(docs)==0:
         return ""
     
-    context = "#### Personalized Relevant User's Information \n"
+    context = ""
     for d in docs:
         context += "- "+ d + "\n"
     
-    print(context)
     return context

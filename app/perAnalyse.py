@@ -5,44 +5,74 @@ from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain_community.vectorstores import FAISS
 import json
 
-def personalize_analyzer(text, phi_model, vector_store, embeddings):
+def personalize_analyzer(text, phi_model):
 
-    prompt_template = """
+    prompt_template = """### Personalized Content Analyzer
 
-    ### Personalized Content Analyzer
+You are an AI assistant trained to identify personalized content in text. Your task is to analyze the given text and determine if it contains any personalized content about the user.
 
-    You are an AI assistant trained to identify personalized content in text. Personalized content includes any information that is specific 
-    to an individual user, such as their preferences, history, demographics, or any identifiable information. Your task is to analyze the 
-    given text and determine if it contains any personalized content.
+#### Instructions:
+Analyze the following text to determine if it contains any personalized content about the user. 
+Extract only factual, explicitly stated information about:
 
-    #### Instructions:
-    Analyze the following text to determine if it contains any personalized content. 
-    Personalized content includes, but is not limited to:
+1. Personal characteristics or identifiers
+2. Preferences or interests
+3. Habits or routines
+4. Skills or abilities
+5. Experiences or history
+6. Current circumstances
+7. Future plans or goals
+8. Relationships or social connections
+9. Opinions or beliefs
+10. Any other explicitly stated user-specific details
 
-    1. Individual preferences (e.g., "I like", "I prefer", "My favorite", "I love")
-    2. Personal history or experiences (e.g., "I've been to", "I've watched", "Last week I", "I work")
-    3. Demographic information (e.g., age, gender, location, occupation)
-    4. Specific identifiers (e.g., names, usernames, email addresses)
-    5. Individual circumstances (e.g., "My car broke down", "I'm looking for a new job")
-    6. Financial information (e.g., "My budget is", "I can afford")
-    7. Educational background (e.g., "I studied", "My major was")
-    8. Family or relationship details (e.g., "My spouse", "My kids")
-    9. Personal goals or intentions (e.g., "I want to", "I'm planning to")
-    ---
+**IMPORTANT**: 
+- List each piece of personalized information as a separate, concise element.
+- Do not add interpretations, explanations, or inferences.
+- Include only information explicitly stated in the text.
 
-    Text to analyze: {text}
-    
-    ---
-    #### Step-by-step analysis: 
-    1. Identify any words or phrases that indicate personal information (e.g., "I", "my", "me").
-    2. Look for specific examples of preferences, experiences, or circumstances.
-    3. Check for any demographic or identifiable information.
-    4. Determine if the text is written from a personal perspective or contains individual-specific details.
-    
-    Based on the analysis, provide a response indicating whether the text contains personalized content. If personalized content is found, break down and summarize each piece of 
-    personalized information in a single line ONLY no need to give any explaination.
 
-    You MUST give formatted response here in JSON with the following format ONLY:
+#### Examples:
+
+Example 1:
+Text: "The sky is blue."
+Output in JSON:
+"isPersonalized": "no",
+"personalizedContent": []
+
+
+Example 2:
+Text: "I enjoy reading science fiction novels before bed."
+Output in JSON:
+"isPersonalized": "yes",
+"personalizedContent": [
+"Enjoys reading science fiction",
+"Has a habit of reading before bed"
+]
+
+
+Example 3:
+Text: "As someone who's allergic to peanuts, I always check food labels carefully."
+Output in JSON:
+"isPersonalized": "yes",
+"personalizedContent": [
+"Has a peanut allergy",
+"Habitually checks food labels"
+]
+---
+
+Text to analyze: {text}
+
+---
+#### Analysis steps: 
+1. Scan for any first-person pronouns or statements that indicate personal information.
+2. Identify any specific details about the user's life, preferences, or circumstances.
+3. Look for patterns or repeated behaviors that might indicate habits or routines.
+4. Consider any information that distinguishes this user from others.
+
+Provide a response indicating whether the text contains personalized content about the user. If personalized content is found, summarize each piece of information concisely.
+
+You MUST give formatted response here in JSON with the following format ONLY:
     ``` 
     JSON
 
@@ -62,7 +92,7 @@ def personalize_analyzer(text, phi_model, vector_store, embeddings):
     llm_chain = LLMChain(
         llm=phi_model,
         prompt=prompt,
-        verbose=True,
+        verbose=False,
         callback_manager=callback_manager
     )
 
@@ -70,6 +100,7 @@ def personalize_analyzer(text, phi_model, vector_store, embeddings):
         response = llm_chain.generate([{"text": text}])
         
         generated_text = response.generations[0][0].text.strip().lower()
+        
         try: 
             return json.loads(generated_text)
 

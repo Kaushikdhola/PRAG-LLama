@@ -75,54 +75,27 @@ QUERY_PROMPT = PromptTemplate(
 
 
 
-def multiQueryRetreiver(user_query, phi_model, vectorStore):
+def multiQueryRetreiver(user_query, phi_model):
     
     llm_chain = LLMChain(
         llm=phi_model,
         prompt=QUERY_PROMPT,
-        verbose=True
+        verbose=False
     )
     
     response = llm_chain.predict(question = user_query)
     
-    # print(type(response))
     queries = [user_query]
 
     try:
         data = json.loads(response)
 
-        # print("Parse data", data)
         questions = data.get('Questions', [])
         queries.extend(questions)
     except Exception as e:
         logging.info(e)
     
     return queries
-    
-    
-
-    
-    # retriever = vectorStore.as_retriever()
-    # retriever_from_llm = MultiQueryRetriever.from_llm(
-    #     retriever=retriever, llm = phi_model
-    # )
-    
-    # docs_original = retriever.invoke(user_query)
-    # docs_multi_query = retriever_from_llm.invoke(user_query)
-    
-    # docs = set([d1.page_content for d1 in docs_original] + [d2.page_content for d2 in docs_multi_query])
-    # print("-" * 100)
-    
-    # print(docs)
-    # context = "\n---\n".join([d.page_content for d in docs])
-    
-    
-    
-    
-    # print(context)
-    
-    return response
-    
 
     
     

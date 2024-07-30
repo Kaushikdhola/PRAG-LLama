@@ -1,89 +1,84 @@
-from langchain_community.llms import Ollama
-from transformers import AutoTokenizer, AutoModel
-from app.faiss_db import FaissDB
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
-from sentence_transformers import util
+from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain_core.output_parsers import JsonOutputParser
+import json
+import logging
 
-# def initialize_models():
-#     llama_model = Ollama(model="llama3")
-#     embeddings = HuggingFaceEmbeddings()
-#     vector_store = FAISS.from_texts(["Initial document"], embeddings)
-#     faiss_db = FaissDB() 
+
+class RephrasedQuestion(BaseModel):
+    RephrasedQuestion: str = Field(description="Reframed Question")
     
-#     return llama_model, vector_store, faiss_db, embeddings
+parser = JsonOutputParser(pydantic_object=RephrasedQuestion)
 
 
-# def generate_response(user_input, user_details, last_response, llama_model, vector_store):
-def generate_response(user_input, context, phi_model):
-    embeddings = HuggingFaceEmbeddings()
 
-    # Create a prompt template
-    # prompt_template = PromptTemplate(
-    #     input_variables=["user_details", "user_input", "context"],
-    #     template="""
-    #     My details: {user_details}
-
-    #     Question: {user_input}
-
-    #     Context: {context}
-        
-    #     Please create a specific and effective prompt based on my details, my question, and the provided context. If the context is relevant to the question, include it in the prompt. Otherwise, generate the prompt using just my details and question. Here is the prompt I need:
-    #     """
-    # )
+def generate_response(user_input, context, phi_model, feedback):
     
     prompt_template = PromptTemplate(
-    input_variables=["generated_prompt"],
+    input_variables=["original_question", "context", "feedback"],
     template="""
+    You are an AI assistant tasked with reframing questions based on personalized user information. Your goal is to tailor the original question to better suit the user's preferences and background while maintaining its core intent and tone.
 
-    Based on my details, please answer the following question:
+Original question: {original_question}
 
-    {generated_prompt}
-    """
-    )
+User's personalized information:
+#### Personalized Relevant User's Information \n
+{context}
+
+#### Please follow these steps to reframe the original question:
+
+1. Analyze the given personalized information and mentally generalize it to broader categories or preferences. 
+   For example:
+   - Specific food preferences might indicate broader cuisine interests
+   - Particular hobbies could suggest general interest areas
+   - Mentioned locations might imply lifestyle preferences
+
+2. Identify key elements of the original question, including its tone, style, and level of formality.
+
+3. Determine which aspects of the generalized understanding are most applicable to the question.
+
+4. Integrate the relevant generalized concepts into the original question, without explicitly mentioning the generalization process.
+
+5. Ensure the CORE intent of the original question is maintained.
+
+6. Keep the reframed question open-ended and avoid narrowing down to specific options.
+
+7. Match the tone, style, and level of formality of the original question in the reframed version.
+
+Important:
+- Use your generalized understanding of ALL relevant personalized information, not just one aspect.
+- Maintain the breadth and simplicity of the original question.
+- Do not assume or add information not implied by the original question or personalized information.
+- Avoid explicitly stating the generalization process in the reframed question.
+- Frame the question from the user's perspective, using "I" and "my" instead of "you" and "your".
+- Keep the reframed question concise and in the same casual tone as the original, if applicable.
+
+#### Feedback : 
+{feedback}
+
+{format_instructions}
 
 
-    # Initialize context
-    # context = ""
-    # sim_score = 0
-    # user_input_embedding = embeddings.embed_query(user_input)
 
-    # # Check similarity with last response
-    # if last_response:
-    #     last_response_embedding = embeddings.embed_query(last_response)
-    #     sim_score = util.cos_sim(last_response_embedding, user_input_embedding).item()
-    #     print("Sim Score for last response {}".format(sim_score))
-    #     # Only add the last response to context if similarity is above 0.8
-    #     if sim_score > 0.9:
-    #         context += f"Previous response: {last_response}\n"
-
-    # # Perform RAG (Retrieval-Augmented Generation)
-    # relevant_docs = vector_store.similarity_search(user_input, k=1)
-    # print(relevant_docs)
-    
-    # # Add relevant information only if similarity condition is met
-    # for doc in relevant_docs:
-    #     doc_embedding = embeddings.embed_query(doc.page_content)
-    #     sim_score_doc = util.cos_sim(doc_embedding, user_input_embedding).item()
-    #     print("Sim Score for doc response {} : {}".format(doc.page_content,sim_score_doc))
-    #     context += f"Our Previous Conversation which is related to the asked question: {doc.page_content}\n"
+Reframed question:
+    """,
+     partial_variables={"format_instructions": parser.get_format_instructions()},
+)
 
     # Create an LLMChain
     llm_chain = LLMChain(
         llm=phi_model,
         prompt=prompt_template,
-        verbose=True
+        verbose=False
     )
 
     # Generate response
-    response = llm_chain.predict(generated_prompt = user_input)
+    response = llm_chain.predict(original_question = user_input, context = context, feedback = feedback)
+    try:
+        data = json.loads(response)
+        return data.get('RephrasedQuestion', user_input)
+    except Exception as e:
+        logging.info(e)
     
-    print("-------------------Response----------------", response)
-
-    # Generate a vector for the response and store it
-
-    return respons
+    return user_input    

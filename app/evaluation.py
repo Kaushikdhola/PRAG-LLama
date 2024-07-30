@@ -1,52 +1,72 @@
-from langchain_community.llms import Ollama
-from transformers import AutoTokenizer, AutoModel
-from app.faiss_db import FaissDB
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
+
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from sentence_transformers import util
-import streamlit as st
+
+from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain_core.output_parsers import JsonOutputParser
+import json
+import logging
 
 
-prompt_template = PromptTemplate(
-    input_variables=["question", "answer"],
+class Evaluation(BaseModel):
+    score: float = Field(description="Score between 0 and 1, where 0 is poor and 1 is excellent")
+    reasoning: str = Field(description="A detailed explanation of your score, addressing each of the above criteria and how well the rephrased question performs in each area. Mention any missed opportunities or irrelevant inclusions")
+    
+parser = JsonOutputParser(pydantic_object=Evaluation)
+
+
+evaluation_prompt = PromptTemplate(
+    input_variables=["Q", "K", "V"],
     template="""
-    You will be given a user_question and system_answer couple.
-    Your task is to provide a 'total rating' scoring how well the system_answer answers the user concerns expressed in the user_question.
-    Give your answer on a scale of 1 to 4, where 1 means that the system_answer is not helpful at all, and 4 means that the system_answer completely and helpfully addresses the user_question.
-    Here is the scale you should use to build your answer:
-    1: The system_answer is terrible: completely irrelevant to the question asked, or very partial
-    2: The system_answer is mostly not helpful: misses some key aspects of the question
-    3: The system_answer is mostly helpful: provides support, but still could be improved
-    4: The system_answer is excellent: relevant, direct, detailed, and addresses all the concerns raised in the question
-    Provide your feedback as follows:
-    Feedback:::
-    Evaluation: (your rationale for the rating, as a text)
-    Total rating: (your rating, as a number between 1 and 4)
-    You MUST provide values for 'Evaluation:' and 'Total rating:' in your answer.
-    Now here are the question and answer.
-    Question: {question}
-    Answer: {answer}
-    Provide your feedback.
-    """
+You are an AI evaluator tasked with assessing how well a rephrased question incorporates personalized information and enriches the original question. Your goal is to provide a score and reasoning for the evaluation.
+
+Original question: {Q}
+
+Relevant personalized information:
+{K}
+
+Rephrased question: {V}
+
+Please evaluate the rephrased question based on the following criteria:
+1. Incorporation of personalized information: How well does the rephrased question integrate the relevant personalized details?
+2. Maintenance of original intent: Does the rephrased question preserve the core purpose of the original question?
+3. Enrichment: How much does the rephrased question add value or context to the original question?
+4. Relevance: Are the incorporated personalized details appropriate and beneficial to the question?
+5. Clarity and conciseness: Is the rephrased question clear and concise while including the necessary information?
+
+{format_instructions}
+
+Remember:
+- A score of 0 indicates no improvement or relevant incorporation of personalized information.
+- A score of 1 indicates perfect incorporation of all relevant personalized information while maintaining the original intent and clarity.
+- Be objective and thorough in your evaluation.
+- Consider both what was included and what might have been missed from the personalized information.
+
+Evaluation:
+""", partial_variables={"format_instructions": parser.get_format_instructions()}
 )
 
-def evaluate_response(user_input, response, vector_store, model):
+def evaluate_response(Q, K, V, model):
     
-    # model = Ollama(model="llama3", temperature = 0.0)
-
     judge_model = LLMChain(
         llm=model,
-        prompt=prompt_template,
-        verbose=True
+        prompt=evaluation_prompt,
+        verbose=False
     )
     
-    eval_result = judge_model.predict(question = user_input, answer = response)
+    eval_result = judge_model.predict( Q = Q, K = K, V = V)
     
-    print("-------------------Evaluation Response-------------------", eval_result)
+
+    try:
+        data = json.loads(eval_result)
+        score = data.get('score', 0)
+        reasoning = data.get('reasoning', "")
+        print(score)
+        print(reasoning)
+        return score, reasoning
+    except Exception as e:
+        logging.info(e)
     
-    return eval_result
+    return 0, ""
 
     
