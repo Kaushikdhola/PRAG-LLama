@@ -1,19 +1,15 @@
-
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.output_parsers import JsonOutputParser
 import json
 import logging
-
 
 class Evaluation(BaseModel):
     score: float = Field(description="Score between 0 and 1, where 0 is poor and 1 is excellent")
     reasoning: str = Field(description="A detailed explanation of your score, addressing each of the above criteria and how well the rephrased question performs in each area. Mention any missed opportunities or irrelevant inclusions")
     
 parser = JsonOutputParser(pydantic_object=Evaluation)
-
 
 evaluation_prompt = PromptTemplate(
     input_variables=["Q", "K", "V"],
@@ -56,7 +52,6 @@ def evaluate_response(Q, K, V, model):
     
     eval_result = judge_model.predict( Q = Q, K = K, V = V)
     
-
     try:
         data = json.loads(eval_result)
         score = data.get('score', 0)
@@ -68,5 +63,3 @@ def evaluate_response(Q, K, V, model):
         logging.info(e)
     
     return 0, ""
-
-    

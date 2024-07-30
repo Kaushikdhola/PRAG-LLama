@@ -1,14 +1,5 @@
-from langchain_community.llms import Ollama
-from transformers import AutoTokenizer, AutoModel
-from app.faiss_db import FaissDB
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from sentence_transformers import util
-import streamlit as st
-from langchain.retrievers.multi_query import MultiQueryRetriever
 import logging
 import json
 from langchain_core.output_parsers import JsonOutputParser
@@ -18,12 +9,10 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 logging.basicConfig()
 logging.getLogger("langchain.retrievers.multi_query").setLevel(logging.INFO)
 
-
 class Question(BaseModel):
     Questions: list = Field(description="list of questions")
     
 parser = JsonOutputParser(pydantic_object=Question)
-
 
 QUERY_PROMPT = PromptTemplate(
     input_variables=["question"],
@@ -73,8 +62,6 @@ QUERY_PROMPT = PromptTemplate(
     partial_variables={"format_instructions": parser.get_format_instructions()},
 )
 
-
-
 def multiQueryRetreiver(user_query, phi_model):
     
     llm_chain = LLMChain(
@@ -96,6 +83,3 @@ def multiQueryRetreiver(user_query, phi_model):
         logging.info(e)
     
     return queries
-
-    
-    

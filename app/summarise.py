@@ -1,13 +1,5 @@
-from langchain_community.llms import Ollama
-from transformers import AutoTokenizer, AutoModel
-from app.faiss_db import FaissDB
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
-from sentence_transformers import util
 
 def summarise(user_question, llama_response, phi3_response, model):
     
@@ -36,5 +28,3 @@ def summarise(user_question, llama_response, phi3_response, model):
     print("-------------------Summarise Response----------------", response)
     
     return response
-    
-    

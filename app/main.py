@@ -1,13 +1,9 @@
 import streamlit as st
-import concurrent.futures
 from .user_details import collect_user_details
 from .chat import display_chat, handle_user_input
 from .response_generation import generate_response
 from .model import initialize_models
-from .prompt_generation import generate_prompt
-from .trainRAG.main import train_model_page
 from .evaluation import evaluate_response   
-from .summarise import summarise
 from .multiqueryretreiver import multiQueryRetreiver
 from .perAnalyse import personalize_analyzer
 from .docRetreiver import docRetreiver
@@ -29,7 +25,6 @@ def try_generate(user_input, context, phi_model, llama_model, feedback = ""):
     # returning 1 as response and user_input is same
     return user_input, 1, ""
         
-
 def formatFeedback(response, feedback):
     return """
     Evaluation of rephrased question
@@ -88,4 +83,4 @@ def run_app():
         
         st.write(response)
                         
-    display_chat()  
+    display_chat()

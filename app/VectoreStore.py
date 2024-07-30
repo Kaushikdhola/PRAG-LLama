@@ -20,8 +20,7 @@ class VectorStore:
     def add_content_to_vector_store(self,content):
         """Add new content to the vector store."""
         for item in content:
-            self.store.add_texts([item], embeddings=[self.embeddings.embed_query(item)])
-        
+            self.store.add_texts([item], embeddings=[self.embeddings.embed_query(item)])  
         self._save_vector_store()
         
     def _save_vector_store(self):
