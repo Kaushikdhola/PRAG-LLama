@@ -18,7 +18,7 @@ def try_generate(user_input, context, phi_model, llama_model, feedback = ""):
     if response != user_input:
         Q, K, V = user_input, context, response
                     
-        score, reasoning = evaluate_response(Q, K, V, phi_model)
+        score, reasoning = evaluate_response(Q, K, V, llama_model)
         
         return V, score, reasoning
     
