@@ -1,31 +1,23 @@
-from langchain_community.llms import Ollama
-from transformers import AutoTokenizer, AutoModel
-from app.faiss_db import FaissDB
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain_community.embeddings import HuggingFaceEmbeddings
 from sentence_transformers import util
 import streamlit as st
 
 def generate_prompt(user_input, user_details, last_response, llama_model, vector_store, embeddings):
 
-
     # Create a prompt template
     prompt_template = PromptTemplate(
     input_variables=["user_details", "user_input", "context"],
     template="""
-    User details: {user_details}
+    My details: {user_details}
 
     Question: {user_input}
 
     Context: {context}
     
-    Please create a specific and effective prompt based on the user's details, the user's question, and the provided context. If the context is relevant to the question, include it in the prompt. Otherwise, generate the prompt using just the user's details and question. Here is the prompt I need:
+    Please create a specific and effective prompt based on the my details, my question, and the provided context. If the context is relevant to the question, include it in the prompt. Otherwise, generate the prompt using just the my details and question. Here is the prompt I need:
     """
     )
-
 
     # Initialize context
     context = ""
@@ -67,12 +59,8 @@ def generate_prompt(user_input, user_details, last_response, llama_model, vector
         details = None
     
     # Generate response
-    response = llm_chain.predict(user_details=details, user_input=user_input, context=context)
+    response = llm_chain.predict(user_details=None, user_input=user_input, context=None)
     
     print("-------------------Response----------------", response)
-
-    # # Generate a vector for the response and store it
-    # response_vector = embeddings.embed_query(response)
-    # vector_store.add_texts([response], embeddings=[response_vector])
 
     return response
